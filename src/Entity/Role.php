@@ -26,7 +26,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *     "get"={"access_control"="is_granted('ROLE_USER')"}
  *     })
  */
-class User implements UserInterface
+class Role implements UserInterface
 {
 
     /**
