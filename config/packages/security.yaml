@@ -13,14 +13,20 @@ security:
              ryan:
                password: 123456
                roles: 'ROLE_USER'
+      database:
+          entity:
+              class: App\Entity\User
+              property: username
+
     encoders:
           Symfony\Component\Security\Core\User\User: plaintext
+          App\Entity\User: bcrypt
 
 
     firewalls:
         login:
             pattern: ^/login
-            provider: in_memory
+            provider: database
             anonymous: true
             stateless: true
             form_login:
@@ -28,22 +34,22 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
                 require_previous_session: false
-#
-        main:
-            pattern: ^/
-            provider: in_memory
-            stateless: true
-            anonymous: true
-            access_denied_handler: App\Security\AccessDeniedHandler
-            guard:
-                authenticators:
-                    - lexik_jwt_authentication.jwt_token_authenticator
+##
+#        main:
+#            pattern: ^/
+#            provider: database
+#            stateless: true
+#            anonymous: true
+#            access_denied_handler: App\Security\AccessDeniedHandler
+#            guard:
+#                authenticators:
+#                    - lexik_jwt_authentication.jwt_token_authenticator
 
         dev:
             pattern:  ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
     access_control:
-        - { path: /api/users, role: ROLE_USER, method: 'GET' }
-        - { path: /api, role: ROLE_ADMIN }
-        - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }
+#        - { path: /api/users, role: ROLE_USER, method: 'GET' }
+#        - { path: /api, role: ROLE_ADMIN }
+#        - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }

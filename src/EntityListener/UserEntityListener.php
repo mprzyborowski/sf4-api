@@ -32,6 +32,7 @@ class UserEntityListener
     {
         if (null !== $object->getPlainPassword()) {
             $password = $this->userPasswordEncoder->encodePassword($object, $object->getPlainPassword());
+            $object->eraseCredentials();
             $object->setPassword($password);
         }
     }

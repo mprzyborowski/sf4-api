@@ -3,9 +3,12 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Class User
@@ -13,6 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * @ORM\Entity
  * @ORM\EntityListeners({"App\EntityListener\UserEntityListener"})
  * @ORM\Table(name="user")
+ * @UniqueEntity("username")
  * @ApiResource(
  *     attributes={
  *      "normalization_context"={"groups"={"api_user_read"}},
@@ -22,8 +26,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *      "delete"={"access_control"="is_granted('ROLE_ADMIN')"},
  *      "put"={"access_control"="is_granted('ROLE_USER')"},
  *      "get"={"access_control"="is_granted('ROLE_ADMIN')"}
- *     }, collectionOperations={
- *     "get"={"access_control"="is_granted('ROLE_USER')"}
  *     })
  */
 class User implements UserInterface
@@ -38,6 +40,7 @@ class User implements UserInterface
     private $id;
     /**
      * @var string
+     * @Assert\Email()
      * @ORM\Column(type="string")
      * @Groups({"api_user_read", "api_user_write"})
      */
@@ -60,9 +63,15 @@ class User implements UserInterface
      */
     private $roles;
 
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Skill", mappedBy="user")
+     */
+    private $skills;
+
     public function __construct()
     {
-        $this->setRoles(['ROLE_USER']);
+        $this->roles = ['ROLE_USER'];
+        $this->skills = new ArrayCollection();
     }
 
     /**
@@ -106,14 +115,6 @@ class User implements UserInterface
     }
 
     /**
-     * @param string $email
-     */
-    public function setUsername(string $email): void
-    {
-        $this->email = $email;
-    }
-
-    /**
      * @return string
      */
     public function getPlainPassword(): string
@@ -145,7 +146,6 @@ class User implements UserInterface
         $this->password = $password;
     }
 
-
     /**
      * @return array
      */
@@ -153,6 +153,7 @@ class User implements UserInterface
     {
         return $this->roles;
     }
+
 
     /**
      * @param array $roles
@@ -163,16 +164,36 @@ class User implements UserInterface
     }
 
     /**
+     * Returns the salt that was originally used to encode the password.
+     *
+     * This can return null if the password was not encoded using a salt.
+     *
      * @return string|null The salt
      */
     public function getSalt()
     {
+        return null;
     }
 
     /**
+     * Removes sensitive data from the user.
+     *
+     * This is important if, at any given point, sensitive information like
+     * the plain-text password is stored on this object.
      */
     public function eraseCredentials()
     {
+        $this->plainPassword = null;
+    }
+
+    public function getSkills()
+    {
+        return $this->skills;
+    }
+
+    public function setSkills($skills): void
+    {
+        $this->skills = $skills;
     }
 
 
